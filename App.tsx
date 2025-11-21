@@ -4,14 +4,17 @@ import { NavRail } from './components/NavRail';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { FileDetailModal } from './components/FileDetailModal';
+import { AdvancedSearchModal } from './components/AdvancedSearchModal';
 import { SystemModule as SystemModuleComponent } from './components/SystemModule';
 import { BorrowModule as BorrowModuleComponent } from './components/BorrowModule';
 import { StatsModule as StatsModuleComponent } from './components/StatsModule';
 import { CollectionModule as CollectionModuleComponent } from './components/CollectionModule';
 import { DisposalModule as DisposalModuleComponent } from './components/DisposalModule';
+import { OrganizeModule as OrganizeModuleComponent } from './components/OrganizeModule';
+import { StorageModule as StorageModuleComponent } from './components/StorageModule';
 import { MOCK_FILE_SYSTEM } from './constants';
-import { FileNode, FileType, BreadcrumbItem, SystemModule } from './types';
-import { FileText, Folder, Image, MoreHorizontal, ChevronRight, SearchX, Lock, ShieldCheck } from 'lucide-react';
+import { FileNode, FileType, BreadcrumbItem, SystemModule, AdvancedSearchParams } from './types';
+import { FileText, Folder, Image, MoreHorizontal, ChevronRight, SearchX, Lock, ShieldCheck, Ruler, Table } from 'lucide-react';
 import { smartSearch } from './services/geminiService';
 
 const getFileIcon = (type: FileType) => {
@@ -19,7 +22,8 @@ const getFileIcon = (type: FileType) => {
     case FileType.FOLDER: return <Folder className="w-5 h-5 text-yellow-500" fill="currentColor" fillOpacity={0.2} />;
     case FileType.PDF: return <FileText className="w-5 h-5 text-red-500" />;
     case FileType.DOCX: return <FileText className="w-5 h-5 text-blue-600" />;
-    case FileType.XLSX: return <FileText className="w-5 h-5 text-green-600" />;
+    case FileType.XLSX: return <Table className="w-5 h-5 text-green-600" />;
+    case FileType.DWG: return <Ruler className="w-5 h-5 text-blue-400" />;
     case FileType.IMAGE: return <Image className="w-5 h-5 text-purple-600" />;
     default: return <FileText className="w-5 h-5 text-gray-400" />;
   }
@@ -34,8 +38,9 @@ export default function App() {
   const [selectedFile, setSelectedFile] = useState<FileNode | null>(null);
   const [searchResults, setSearchResults] = useState<string[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false);
 
-  // System, Collection, Stats, Disposal Module State (Shared generic view state for sub-menus)
+  // System, Collection, Stats, Disposal, Organize, Storage Module State (Shared generic view state for sub-menus)
   const [activeSystemView, setActiveSystemView] = useState('users');
   
   // Handle module change reset
@@ -46,9 +51,13 @@ export default function App() {
     } else if (module === 'system') {
       setActiveSystemView('users');
     } else if (module === 'stats') {
-      setActiveSystemView('general'); // Default for stats
+      setActiveSystemView('general');
     } else if (module === 'disposal') {
-      setActiveSystemView('destruction'); // Default for disposal
+      setActiveSystemView('destruction');
+    } else if (module === 'organize') {
+      setActiveSystemView('catalog');
+    } else if (module === 'storage') {
+      setActiveSystemView('warehouse');
     }
   };
 
@@ -64,7 +73,7 @@ export default function App() {
 
   // Breadcrumbs Logic
   const breadcrumbs: BreadcrumbItem[] = useMemo(() => {
-    if (searchResults) return [{ id: 'root', name: '智能检索结果' }];
+    if (searchResults) return [{ id: 'root', name: '检索结果' }];
     
     const path: BreadcrumbItem[] = [];
     let currentId: string | null = currentFolderId;
@@ -111,11 +120,33 @@ export default function App() {
       const lowerQuery = query.toLowerCase();
       const results = Object.values(fileSystem).filter(f => 
         f.name.toLowerCase().includes(lowerQuery) || 
-        (f.archiveCode && f.archiveCode.toLowerCase().includes(lowerQuery))
+        (f.archiveCode && f.archiveCode.toLowerCase().includes(lowerQuery)) ||
+        (f.content && f.content.toLowerCase().includes(lowerQuery))
       ).map(f => f.id);
       setSearchResults(results);
     }
     
+    setIsSearching(false);
+  };
+
+  const handleAdvancedSearch = (params: AdvancedSearchParams) => {
+    setActiveModule('archives');
+    setIsSearching(true);
+    
+    const results = Object.values(fileSystem).filter(f => {
+      let match = true;
+      if (params.keyword) {
+        const k = params.keyword.toLowerCase();
+        if (!f.name.toLowerCase().includes(k) && !f.content?.toLowerCase().includes(k)) match = false;
+      }
+      if (params.archiveCode && !f.archiveCode?.includes(params.archiveCode)) match = false;
+      if (params.owner && !f.owner.includes(params.owner)) match = false;
+      if (params.securityLevel && f.securityLevel !== params.securityLevel) match = false;
+      // Date filter logic would be here
+      return match;
+    }).map(f => f.id);
+
+    setSearchResults(results);
     setIsSearching(false);
   };
 
@@ -127,7 +158,11 @@ export default function App() {
 
       <div className="flex flex-col flex-1 min-w-0">
         {/* 2. Header */}
-        <Header onSearch={handleSearch} currentModule={activeModule} />
+        <Header 
+          onSearch={handleSearch} 
+          onOpenAdvancedSearch={() => setIsAdvancedSearchOpen(true)}
+          currentModule={activeModule} 
+        />
 
         <div className="flex flex-1 overflow-hidden">
           {/* 3. Contextual Sidebar (Tree or Menu) */}
@@ -262,6 +297,8 @@ export default function App() {
             {activeModule === 'collection' && <CollectionModuleComponent view={activeSystemView} />}
             {activeModule === 'stats' && <StatsModuleComponent view={activeSystemView} />}
             {activeModule === 'disposal' && <DisposalModuleComponent view={activeSystemView} />}
+            {activeModule === 'organize' && <OrganizeModuleComponent view={activeSystemView} />}
+            {activeModule === 'storage' && <StorageModuleComponent view={activeSystemView} />}
             {activeModule === 'system' && <SystemModuleComponent view={activeSystemView} />}
 
             {/* Footer Info */}
@@ -280,6 +317,12 @@ export default function App() {
           onClose={() => setSelectedFile(null)} 
         />
       )}
+
+      <AdvancedSearchModal 
+        isOpen={isAdvancedSearchOpen} 
+        onClose={() => setIsAdvancedSearchOpen(false)} 
+        onSearch={handleAdvancedSearch} 
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ export enum FileType {
   XLSX = 'XLSX',
   IMAGE = 'IMAGE',
   TEXT = 'TEXT',
+  DWG = 'DWG',
   UNKNOWN = 'UNKNOWN'
 }
 
@@ -26,6 +27,8 @@ export interface FileNode {
   tags?: string[];
   version?: string; // v1.0
   archiveCode?: string; // 档号
+  canDownload?: boolean;
+  canPrint?: boolean;
 }
 
 export interface BreadcrumbItem {
@@ -61,6 +64,8 @@ export interface BorrowRequest {
   status: 'pending' | 'approved' | 'rejected';
   requestDate: string;
   expiryDate?: string;
+  approver?: string;
+  approveDate?: string;
 }
 
 export interface DisposalRecord {
@@ -85,4 +90,13 @@ export interface CompilationTopic {
   status: 'draft' | 'published';
 }
 
-export type SystemModule = 'archives' | 'collection' | 'borrow' | 'stats' | 'disposal' | 'system';
+export interface AdvancedSearchParams {
+  keyword?: string;
+  archiveCode?: string;
+  owner?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  securityLevel?: string;
+}
+
+export type SystemModule = 'archives' | 'collection' | 'organize' | 'storage' | 'borrow' | 'stats' | 'disposal' | 'system';

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Search, Bell, HelpCircle, Settings, Sparkles, Grid, Menu } from 'lucide-react';
+import { Search, Bell, HelpCircle, Settings, Sparkles, Grid, Menu, ListFilter } from 'lucide-react';
 
 interface HeaderProps {
   onSearch: (query: string, isSmart: boolean) => void;
+  onOpenAdvancedSearch: () => void;
   currentModule: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onSearch, currentModule }) => {
+export const Header: React.FC<HeaderProps> = ({ onSearch, onOpenAdvancedSearch, currentModule }) => {
   const [query, setQuery] = useState('');
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -46,13 +47,21 @@ export const Header: React.FC<HeaderProps> = ({ onSearch, currentModule }) => {
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-24 py-1.5 border border-gray-300 rounded-md leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm transition-all shadow-sm"
+            className="block w-full pl-10 pr-32 py-1.5 border border-gray-300 rounded-md leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm transition-all shadow-sm"
             placeholder="请输入档号、标题、文号或全文关键字..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
           />
           <div className="absolute inset-y-0 right-0 flex items-center">
+             <button 
+               onClick={onOpenAdvancedSearch}
+               className="flex items-center justify-center p-1.5 mr-1 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+               title="高级检索"
+             >
+               <ListFilter className="w-4 h-4" />
+             </button>
+             <div className="h-4 w-px bg-gray-300 mx-1"></div>
              <button 
               onClick={handleSmartSearch}
               className="flex items-center px-3 py-0.5 mr-1 bg-blue-600 hover:bg-blue-700 text-[11px] rounded text-white transition-colors shadow-sm"

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Files, BookOpen, BarChart3, Settings, Layers, ArchiveRestore, Recycle } from 'lucide-react';
+import { Files, BookOpen, BarChart3, Settings, Layers, ArchiveRestore, Recycle, Library, HardDrive } from 'lucide-react';
 import { SystemModule } from '../types';
 
 interface NavRailProps {
@@ -12,6 +12,8 @@ export const NavRail: React.FC<NavRailProps> = ({ activeModule, onChangeModule }
   const navItems = [
     { id: 'archives', icon: Files, label: '档案中心' },
     { id: 'collection', icon: ArchiveRestore, label: '档案收集' },
+    { id: 'organize', icon: Library, label: '整理鉴定' },
+    { id: 'storage', icon: HardDrive, label: '存储保管' },
     { id: 'borrow', icon: BookOpen, label: '借阅中心' },
     { id: 'stats', icon: BarChart3, label: '统计编研' },
     { id: 'disposal', icon: Recycle, label: '档案处置' },

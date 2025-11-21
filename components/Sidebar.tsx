@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, Folder, FolderOpen, Shield, Database, UserCog, FileText, UploadCloud, FilePlus, Server, Smartphone, PieChart, FileBarChart, BookText, Trash2, ArrowRightLeft } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FolderOpen, Shield, Database, UserCog, FileText, UploadCloud, FilePlus, Server, Smartphone, PieChart, FileBarChart, BookText, Trash2, ArrowRightLeft, Hash, Package, Scale, HardDrive, Save, FileType as FileTypeIcon } from 'lucide-react';
 import { FileNode, FileType, SystemModule } from '../types';
 
 interface SidebarProps {
@@ -145,6 +145,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'transfer', icon: ArrowRightLeft, label: '档案移交管理' },
   ];
 
+  const organizeMenuItems = [
+    { id: 'catalog', icon: Hash, label: '自动编目' },
+    { id: 'boxing', icon: Package, label: '虚拟组卷/装盒' },
+    { id: 'appraisal', icon: Scale, label: '价值鉴定' },
+  ];
+
+  const storageMenuItems = [
+    { id: 'warehouse', icon: HardDrive, label: '数字仓库监控' },
+    { id: 'backup', icon: Save, label: '备份与容灾' },
+    { id: 'format', icon: FileTypeIcon, label: '存储格式管理' },
+  ];
+
   return (
     <aside className="w-60 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden flex-shrink-0 shadow-inner">
       
@@ -179,6 +191,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex-1 overflow-y-auto">
           <div className="px-4 py-3 text-xs font-bold text-gray-400 uppercase">收集与整理</div>
           <MenuList items={collectionMenuItems} activeView={activeSystemView} onNavigate={onSystemNavigate} />
+        </div>
+      )}
+
+      {module === 'organize' && (
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 py-3 text-xs font-bold text-gray-400 uppercase">档案库房作业</div>
+          <MenuList items={organizeMenuItems} activeView={activeSystemView} onNavigate={onSystemNavigate} />
+        </div>
+      )}
+
+      {module === 'storage' && (
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 py-3 text-xs font-bold text-gray-400 uppercase">存储与安全</div>
+          <MenuList items={storageMenuItems} activeView={activeSystemView} onNavigate={onSystemNavigate} />
         </div>
       )}
 
